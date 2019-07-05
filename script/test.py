@@ -12,11 +12,13 @@ def pp_append():
     client = rospy.ServiceProxy('append', Empty)
     client()
 
+def pp_judge():
+    rospy.wait_for_service('judge')
+    client = rospy.ServiceProxy('judge', Empty)
+    client()
 
 if __name__=='__main__':
     rospy.init_node('tester_pp')
-    pp_init()
-    pp_append()
 
     
 
