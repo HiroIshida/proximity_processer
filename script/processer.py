@@ -10,9 +10,9 @@ class ProxProc:
 
     def __init__(self):
         sub = rospy.Subscriber("/proximity_sensor", ProximityStamped, self.callback_prox)
-        survice_init = rospy.Service("init", Empty, self.handle_request_init)
-        survice_append = rospy.Service("append", Empty, self.handle_request_append)
-        survice_judge = rospy.Service("judge", IsCollision, self.handle_request_judge)
+        survice_init = rospy.Service("proximity_processer/init", Empty, self.handle_request_init)
+        survice_append = rospy.Service("proximity_processer/append", Empty, self.handle_request_append)
+        survice_judge = rospy.Service("proximity_processer/judge", IsCollision, self.handle_request_judge)
         self.val = None
         self.val_ref = None
         self.val_relative_lst = []

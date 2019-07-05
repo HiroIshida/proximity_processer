@@ -4,18 +4,18 @@ from std_srvs.srv import *
 from proximity_processer.srv import *
 
 def pp_init():
-    rospy.wait_for_service('init')
-    client = rospy.ServiceProxy('init', Empty)
+    rospy.wait_for_service('proximity_processer/init')
+    client = rospy.ServiceProxy('proximity_processer/init', Empty)
     client()
 
 def pp_append():
-    rospy.wait_for_service('append')
-    client = rospy.ServiceProxy('append', Empty)
+    rospy.wait_for_service('proximity_processer/append')
+    client = rospy.ServiceProxy('proximity_processer/append', Empty)
     client()
 
 def pp_judge():
-    rospy.wait_for_service('judge')
-    client = rospy.ServiceProxy('judge', IsCollision)
+    rospy.wait_for_service('proximity_processer/judge')
+    client = rospy.ServiceProxy('proximity_processer/judge', IsCollision)
     ret = client()
     return ret 
 
