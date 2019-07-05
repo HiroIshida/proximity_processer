@@ -2,7 +2,8 @@
 import rospy
 from force_proximity_ros.msg import ProximityStamped
 from std_srvs.srv import *
-#from proximity_processer.srv import *
+from std_msgs.msg import Bool
+from proximity_processer.srv import *
 
 class ProxProc:
     threshold = 500
@@ -11,7 +12,7 @@ class ProxProc:
         sub = rospy.Subscriber("/proximity_sensor", ProximityStamped, self.callback_prox)
         survice_init = rospy.Service("init", Empty, self.handle_request_init)
         survice_append = rospy.Service("append", Empty, self.handle_request_append)
-        survice_judge = rospy.Service("judge", Empty, self.handle_request_judge)
+        survice_judge = rospy.Service("judge", IsCollision, self.handle_request_judge)
         self.val = None
         self.val_ref = None
         self.val_relative_lst = []
@@ -33,7 +34,8 @@ class ProxProc:
 
     def handle_request_judge(self, req):
         print self._isCollision()
-        return EmptyResponse()
+        boolean = Bool(data = self._isCollision())
+        return IsCollisionResponse(isCollision = boolean)
 
     def callback_prox(self, data):
         self.val = data.proximity.average
