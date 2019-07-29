@@ -15,6 +15,13 @@ add_service_files(
   IsCollision.srv
 )
 
+add_message_files(
+  FILES
+  FloatHeader.msg
+)
+
+
+
 generate_messages(
   DEPENDENCIES
   std_msgs
