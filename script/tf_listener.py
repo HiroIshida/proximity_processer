@@ -45,8 +45,6 @@ class MyQueue:
     def mean(self):
         return sum(self.data)*1.0/self.N
 
-mq = MyQueue(1)
-
 class ProxProc:
     def __init__(self):
         sub = rospy.Subscriber("/proximity_sensor", ProximityStamped, self.callback_prox)
@@ -81,11 +79,20 @@ class ProxProc:
             self.dval_queue.push(dval)
             dval_average = self.dval_queue.mean()
 
-            dv_dp = dval_average/vel_average
+            if vel_average == 0:
+                dv_dp = 0.0
+            else:
+                dv_dp = dval_average/vel_average
+
+            if abs(dv_dp) > 1e+8:
+                dv_dp = 0.0
+
+            print dv_dp
 
             fh = FloatHeader(header = Header(stamp = rospy.Time.now()), 
                     data = Float64(data = dv_dp))
             self.pub.publish(fh)
+
 
         self.t_pre = t
         self.p_pre = p
