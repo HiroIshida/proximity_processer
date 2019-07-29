@@ -32,18 +32,33 @@ listener = tf.TransformListener()
 pub = rospy.Publisher("chatter", Float64, queue_size = 1)
 r = rospy.Rate(10)
 
+class tf_processer:
+    def __init__(self):
+        self.t_pre = None
+        self.p_pre = None
+
+    def compute_derivative(self):
+        fr_target = 'base_link'
+        fr_source = 'l_gripper_tool_frame'
+        listener.waitForTransform(fr_target, fr_source, rospy.Time(), rospy.Duration(4.0))
+        p, rot = listener.lookupTransform(fr_target, fr_source, rospy.Time(0))
+        t = rospy.get_time()
+
+        isInitialized = (self.t_pre is not None)
+        if isInitialized:
+            dt = t - self.t_pre
+            dp = (np.array(p) - np.array(self.p_pre))/dt
+            vel = np.linalg.norm(dp)
+            print vel
+
+        self.t_pre = t
+        self.p_pre = p
+
+tfp = tf_processer()
 
 while not rospy.is_shutdown():
-    print "hage"
-    #t_now = rospy.get_rostime()
-    fr_target = 'base_link'
-    fr_source = 'l_gripper_tool_frame'
-    listener.waitForTransform(fr_target, fr_source, rospy.Time(), rospy.Duration(4.0))
-    trans, rot = listener.lookupTransform(fr_target, fr_source, rospy.Time(0))
-    """
-    e = tf.transformations.euler_from_quaternion((rot[0], rot[1], rot[2], rot[3]))
-    mat = rpy_to_mat(e[0], e[1], e[2])
-    """
-    print trans
+    tfp.compute_derivative()
+    rospy.sleep(0.03)
+
 
 
