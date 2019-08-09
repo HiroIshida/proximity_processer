@@ -25,7 +25,7 @@
           (return))
       (incf counter))))
 
-(setq *diff_val* nil)
+(setq *diff_val* 0)
 
 (ros::subscribe "test" proximity_processer::FloatHeader
                 #'(lambda (msg) 
@@ -35,13 +35,16 @@
       (value-pre 0))
   (loop 
     (setq time-now (send (ros::time-now) :sec))
-    (when (> (- time-now time-begin) 5)
+    (when (> (- time-now time-begin) 10)
       (return))
-    (send *robot* :larm :move-end-pos #f(0 -2 0) :world)
-    (send *ri* :angle-vector (send *robot* :angle-vector) 1500)
+    (send *robot* :larm :move-end-pos #f(0 -1 0) :world)
+    (send *ri* :angle-vector (send *robot* :angle-vector) 2000)
     ;(unix:usleep 10000)
     (ros::spin-once)
-    (when (and (< *diff_val* value-pre) (> *diff_val* 50000))
+    (when (< (- *diff_val* value-pre) -10000)
+      (print "result")
+      (print value-pre)
+      (print *diff_val*)
       (send *ri* :cancel-angle-vector)
       (send *ri* :wait-interpolation)
       (return))
