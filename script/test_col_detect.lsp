@@ -37,25 +37,24 @@
                 #'(lambda (msg)
                     (setq *prox* (send msg :proximity :average))))
 
+(send *robot* :larm :move-end-pos 
+      #f(0 -300 0)
+      :world)
+
+(send *ri* :angle-vector (send *robot* :angle-vector) 30000)
+
 (let ((time-begin (send (ros::time-now) :sec))
       (time-maximam 20);sec
       (value-pre 0))
   (loop 
     (setq time-now (send (ros::time-now) :sec))
-    (print time-now)
     (when (> (- time-now time-begin) time-maximam)
       (return))
-    (send *robot* :larm :move-end-pos 
-          #f(0 -1 0)
-          :world)
-    (send *ri* :angle-vector (send *robot* :angle-vector) 1000)
-    ;(unix:usleep 10000)
     (ros::spin-once)
     (print "-------------------------")
-    (print *prox*)
     (print *diff_val*)
-    (print (- *diff_val* value-pre))
-    (when (< (- *diff_val* value-pre) -20000)
+    (unix:usleep 5000)
+    (when (and (< (- *diff_val* value-pre) -40000) (> *diff_val* 100000))
       (speak-jp "あ")
       (print "result")
       (print value-pre)
@@ -63,8 +62,8 @@
       (send *ri* :cancel-angle-vector)
       (send *ri* :wait-interpolation)
       (return))
-    (setq value-pre *diff_val*)
-    ))
+    (setq value-pre *diff_val*))
+  )
 
 
 
