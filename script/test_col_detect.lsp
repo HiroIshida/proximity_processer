@@ -1,5 +1,6 @@
 (load "package://pr2eus/pr2-interface.l")
 (ros::load-ros-manifest "proximity_processer")
+(ros::load-ros-manifest "force_proximity_ros")
 
 (defun warning-message (hoge hogen &rest hoenn) nil) ;; overriden
 
@@ -26,22 +27,36 @@
       (incf counter))))
 
 (setq *diff_val* 0)
+(setq *prox* 0)
 
 (ros::subscribe "test" proximity_processer::FloatHeader
                 #'(lambda (msg) 
                     (setq *diff_val* (send msg :data :data))))
 
+(ros::subscribe "/proximity_sensor" force_proximity_ros::ProximityStamped
+                #'(lambda (msg)
+                    (setq *prox* (send msg :proximity :average))))
+
 (let ((time-begin (send (ros::time-now) :sec))
+      (time-maximam 20);sec
       (value-pre 0))
   (loop 
     (setq time-now (send (ros::time-now) :sec))
-    (when (> (- time-now time-begin) 10)
+    (print time-now)
+    (when (> (- time-now time-begin) time-maximam)
       (return))
-    (send *robot* :larm :move-end-pos #f(0 -1 0) :world)
-    (send *ri* :angle-vector (send *robot* :angle-vector) 2000)
+    (send *robot* :larm :move-end-pos 
+          #f(0 -1 0)
+          :world)
+    (send *ri* :angle-vector (send *robot* :angle-vector) 1000)
     ;(unix:usleep 10000)
     (ros::spin-once)
-    (when (< (- *diff_val* value-pre) -10000)
+    (print "-------------------------")
+    (print *prox*)
+    (print *diff_val*)
+    (print (- *diff_val* value-pre))
+    (when (< (- *diff_val* value-pre) -20000)
+      (speak-jp "あ")
       (print "result")
       (print value-pre)
       (print *diff_val*)
@@ -49,7 +64,7 @@
       (send *ri* :wait-interpolation)
       (return))
     (setq value-pre *diff_val*)
-    (print *diff_val*)))
+    ))
 
 
 
