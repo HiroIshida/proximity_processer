@@ -28,6 +28,7 @@
 
 (setq *diff_val* 0)
 (setq *prox* 0)
+(setq *prox-init* nil)
 
 (ros::subscribe "test" proximity_processer::FloatHeader
                 #'(lambda (msg) 
@@ -37,11 +38,27 @@
                 #'(lambda (msg)
                     (setq *prox* (send msg :proximity :average))))
 
-(send *robot* :larm :move-end-pos 
-      #f(0 -300 0)
-      :world)
 
-(send *ri* :angle-vector (send *robot* :angle-vector) 30000)
+
+(speak-jp "はじめます")
+(send *robot* :larm :move-end-pos #f(0 -300 0) :world)
+(send *ri* :angle-vector (send *robot* :angle-vector) 10000)
+
+(ros::spin-once)
+(setq *prox-init* *prox*)
+(print *prox*)
+(print *prox-init*)
+
+(loop
+  (ros::spin-once)
+  (print (- *prox* *prox-init*))
+  (when (> (- *prox* *prox-init*) 200)
+    (send *ri* :stop-motion)
+    (speak-jp "stop") 
+    (return)))
+
+(send *robot* :larm :move-end-pos #f(0 -300 0) :world)
+(send *ri* :angle-vector (send *robot* :angle-vector) 40000)
 
 (let ((time-begin (send (ros::time-now) :sec))
       (time-maximam 20);sec
@@ -51,11 +68,10 @@
     (when (> (- time-now time-begin) time-maximam)
       (return))
     (ros::spin-once)
-    (print "-------------------------")
-    (print *diff_val*)
-    (print *prox*)
-    (unix:usleep 5000)
-    (when (and (< (- *diff_val* value-pre) -20000) (> *diff_val* 100000))
+    ;(unix:usleep 5000)
+    (print "------==")
+    (print (- *diff_val* value-pre))
+    (when (and (< (- *diff_val* value-pre) (* (abs value-pre) -0.2)) (> *diff_val* 100000))
       (speak-jp "あ")
       (print "result")
       (print value-pre)
